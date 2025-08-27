@@ -1,5 +1,16 @@
+/* Show scrollbar only in chat area */
+.chat-scrollbar {
+	scrollbar-width: thin;
+	scrollbar-color: #444 #222;
+}
+.chat-scrollbar::-webkit-scrollbar {
+	width: 8px;
+	background: #222;
+	
+}
+.chat-scrollbar::-webkit-scrollbar-thumb {
+	background: #444;
+	border-radius: 4px;
+}
 @import "tailwindcss";
 
-::-webkit-scrollbar{
-    display: none;
-}

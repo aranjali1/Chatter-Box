@@ -67,7 +67,7 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
             onClick={() => setSelectedUser(user)}
             className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
               selectedUser?._id === user._id
-                ? "bg-green-900/40 border border-green-500/40"
+                ? "bg-green-900/40 border border-green-900/40"
                 : "hover:bg-neutral-800"
             }`}
           >
