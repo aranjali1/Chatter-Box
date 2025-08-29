@@ -7,15 +7,26 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [bio, setBio] = useState("");
+  const [profilePic, setProfilePic] = useState(null);
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
-  const onSubmitHandler=(e)=>{
+  const onSubmitHandler = (e) => {
     e.preventDefault();
-    if(currState==='signup' && !isDataSubmitted){
-      setIsDataSubmitted(true)
+    if (currState === "signup" && !isDataSubmitted) {
+      setIsDataSubmitted(true);
       return;
     }
-  }
+
+    // Final form submit
+    const formData = {
+      fullName,
+      email,
+      password,
+      bio,
+      profilePic,
+    };
+    console.log("Form Submitted:", formData);
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-neutral-950 px-4">
@@ -26,8 +37,7 @@ const Login = () => {
         </h1>
 
         {/* Form */}
-        <form onSubmit={onSubmitHandler}
-        className="space-y-4">
+        <form onSubmit={onSubmitHandler} className="space-y-4">
           {/* Form Title */}
           <h2 className="flex items-center justify-center gap-2 text-xl font-semibold text-white">
             {currState === "signup" ? "Sign Up" : "Login"}
@@ -67,16 +77,29 @@ const Login = () => {
             </>
           )}
 
-          {/* Bio (after submit on signup) */}
+          {/* Bio + Profile Pic (after submit on signup) */}
           {currState === "signup" && isDataSubmitted && (
-            <textarea
-              onChange={(e) => setBio(e.target.value)}
-              value={bio}
-              rows={4}
-              placeholder="Provide a short bio..."
-              required
-              className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white border border-gray-700 focus:border-green-500 focus:outline-none resize-none"
-            />
+            <>
+              <textarea
+                onChange={(e) => setBio(e.target.value)}
+                value={bio}
+                rows={4}
+                placeholder="Provide a short bio..."
+                required
+                className="w-full px-4 py-2 mt-2 rounded-lg bg-neutral-800 text-white border border-gray-700 focus:border-green-500 focus:outline-none resize-none"
+              />
+
+              {/* Profile Picture (optional) */}
+              <h3 className="text-white font-medium mb-1">
+      Upload Profile Picture <span className="text-gray-400 text-sm">(optional)</span>
+    </h3>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setProfilePic(e.target.files[0])}
+                className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white border border-gray-700 focus:border-green-500 focus:outline-none file:cursor-pointer file:bg-green-600 file:text-white file:border-none file:px-3 file:py-1 file:rounded-lg"
+              />
+            </>
           )}
 
           {/* Submit Button */}
@@ -84,7 +107,11 @@ const Login = () => {
             type="submit"
             className="w-full bg-green-600 hover:bg-green-700 transition py-2 rounded-lg text-white font-medium"
           >
-            {currState === "signup" ? "Create Account" : "Login"}
+            {currState === "signup"
+              ? isDataSubmitted
+                ? "Finish Signup"
+                : "Create Account"
+              : "Login"}
           </button>
 
           {/* Terms */}
@@ -104,36 +131,35 @@ const Login = () => {
           </div>
 
           {/* Toggle between login/signup */}
-<div className="flex flex-col gap-2 items-center mt-4">
-  {currState === "signup" ? (
-    <p className="text-sm text-gray-600">
-      Already have an account?{" "}
-      <span
-        onClick={() => {
-          setCurrState("login");
-          setIsDataSubmitted(false);
-        }}
-        className="font-medium text-green-500 cursor-pointer hover:underline"
-      >
-        Login here
-      </span>
-    </p>
-  ) : (
-    <p className="text-sm text-gray-600">
-      Create an account{" "}
-      <span
-        onClick={() => {
-          setCurrState("signup");
-          setIsDataSubmitted(false);
-        }}
-        className="font-medium text-green-500 cursor-pointer hover:underline"
-      >
-        Click here
-      </span>
-    </p>
-  )}
-</div>
-
+          <div className="flex flex-col gap-2 items-center mt-4">
+            {currState === "signup" ? (
+              <p className="text-sm text-gray-600">
+                Already have an account?{" "}
+                <span
+                  onClick={() => {
+                    setCurrState("login");
+                    setIsDataSubmitted(false);
+                  }}
+                  className="font-medium text-green-500 cursor-pointer hover:underline"
+                >
+                  Login here
+                </span>
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600">
+                Create an account{" "}
+                <span
+                  onClick={() => {
+                    setCurrState("signup");
+                    setIsDataSubmitted(false);
+                  }}
+                  className="font-medium text-green-500 cursor-pointer hover:underline"
+                >
+                  Click here
+                </span>
+              </p>
+            )}
+          </div>
         </form>
       </div>
     </div>
