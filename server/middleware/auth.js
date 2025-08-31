@@ -24,5 +24,5 @@ export const protectRoute=async(req,res,next)=>{
 }
 
 export const checkAuth=(req,res)=>{
-    res.json({success:true,userData:req.user});
+    res.json({success:true,user:req.user});
 }

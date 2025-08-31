@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import assets from "../assets/assets";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [currState, setCurrState] = useState("signup");
@@ -10,22 +13,20 @@ const Login = () => {
   const [profilePic, setProfilePic] = useState(null);
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
-  const onSubmitHandler = (e) => {
+  const {login}=useContext(AuthContext);
+  const navigate=useNavigate();
+
+  const onSubmitHandler = async(e) => {
     e.preventDefault();
     if (currState === "signup" && !isDataSubmitted) {
       setIsDataSubmitted(true);
       return;
     }
 
-    // Final form submit
-    const formData = {
-      fullName,
-      email,
-      password,
-      bio,
-      profilePic,
-    };
-    console.log("Form Submitted:", formData);
+    const success=await login(currState==="signup"?"signup":"login",{fullName,email,password,bio,profilePic});
+  if(success) navigate("/", { replace: true });
+
+    console.log("Form submitted",{fullName,email,password,bio,profilePic});
   };
 
   return (

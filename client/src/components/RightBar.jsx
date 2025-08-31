@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import assets, { imagesDummyData } from '../assets/assets'
+import { AuthContext } from '../../context/AuthContext'
 
 const RightBar = ({ selectedUser }) => {
+
+  const {logout}=useContext(AuthContext);
   return (
     selectedUser && (
       <div className="bg-neutral-950 border-l border-green-500/30 p-4 h-full w-72 flex flex-col">
@@ -41,7 +44,7 @@ const RightBar = ({ selectedUser }) => {
         </div>
 
         {/* Logout Button */}
-        <button className="mt-4 w-full bg-green-700 hover:bg-green-600 text-white py-2 rounded-lg font-medium transition-colors duration-200">
+        <button className="mt-4 w-full bg-green-700 hover:bg-green-600 text-white py-2 rounded-lg font-medium transition-colors duration-200" onClick={()=>logout()}>
           Logout
         </button>
       </div>

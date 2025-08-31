@@ -1,6 +1,7 @@
 import Msg from "../models/Msg.js";
 import User from "../models/User.js";
 import cloudinary from "../lib/cloudinary.js";
+import { io, userSocketMap } from "../app.js";
 
 export const getUsersForSidebar=async(req,res)=>{
     try{
@@ -9,8 +10,8 @@ export const getUsersForSidebar=async(req,res)=>{
 
         const unseenMsg={};
         const promises=users.map(async(user)=>{
-            const msg=await Msg.findOne({senderId:user._id,receiverId:userId,isRead:false}).sort({createdAt:-1});
-            unseenMsg[user._id]=msg.length;
+            const count=await Msg.countDocuments({senderId:user._id,receiverId:userId,isRead:false});
+            unseenMsg[user._id]=count;
         });
         await Promise.all(promises);
 
@@ -63,16 +64,22 @@ export const sendMsg=async(req,res)=>{
         if(!text&&!media){
             return res.json({success:false,message:"Msg is empty"});
         }
+        let imageUrl;
         if(media){
             const uploadResponse = await cloudinary.uploader.upload(media)
             imageUrl = uploadResponse.secure_url;
         }
-        const newMsg=new Msg.create({senderId,receiverId,text,media:imageUrl});
-        await newMsg.save();
+        const newMsg=await Msg.create({senderId,receiverId,text,media:imageUrl});
+
+        //emit the new msg to the receiver's socket
+        const receiverSocketId=userSocketMap[receiverId];  //get receiver's socketId from map
+        if(receiverSocketId){ //if receiver is online
+            io.to(receiverSocketId).emit("newMsg",newMsg); //emit to only that socket
+        }
         res.json({success:true,newMsg});
 
     }catch(err){
         console.log(err.message);
-        res.json({success:false,message:"Failed to send message"});
+        res.status(500).json({success:false,message:"Failed to send message"});
     }
 }

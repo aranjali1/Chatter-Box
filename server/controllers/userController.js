@@ -17,7 +17,7 @@ export const signup=async (req, res) => {
         const hashed=await bcrypt.hash(password,salt);
         const newUser=await User.create({fullName,email,password:hashed,bio});
         const token=generateToken(newUser._id);
-        res.json({success:true, userData:newUser,token,message:"Account created successfully"});
+        res.json({success:true, user:newUser,token,message:"Account created successfully"});
     }catch(err){
         console.log(err.message);
         res.json({success:false,message:err.message});
@@ -39,7 +39,7 @@ export const login=async(req,res)=>{
             return res.json({success:false,message:"Incorrect password"});
         }
         const token=generateToken(user._id);
-        res.json({success:true,userData:user,token,message:"Login successful"});
+        res.json({success:true,user:user,token,message:"Login successful"});
     }catch(err){
         console.log(err.message);
         res.json({success:false,message:err.message});

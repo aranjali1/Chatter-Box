@@ -1,24 +1,29 @@
-import React, { useState } from "react";
-import assets, { userDummyData } from "../assets/assets";
+import React, { useContext, useState, useEffect } from "react";
+import assets from "../assets/assets";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
+import { ChatContext } from "../../context/ChatContext";
 
-const Sidebar = ({ selectedUser, setSelectedUser }) => {
+const Sidebar = () => {
+  const { getUsers, user = [], selectedUser, setSelectedUser, unseenMsg = {}, setUnseenMsg } = useContext(ChatContext);
+  const { logout, onlineUsers = [] } = useContext(AuthContext);
+
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  // filter users based on search
-  const filteredUsers = userDummyData.filter((user) =>
-    user.fullName.toLowerCase().includes(search.toLowerCase())
-  );
+  // Filter users based on search input
+  const filteredUsers = search
+    ? user.filter((u) => u.fullName?.toLowerCase().includes(search.toLowerCase()))
+    : user;
+
+  useEffect(() => {
+    getUsers();
+  }, [onlineUsers]);
 
   return (
-    <div
-      className={`${
-        selectedUser ? "max-md:hidden" : ""
-      } h-full flex flex-col bg-neutral-950 p-3`}
-    >
-      {/* Top bar (title + menu icon) */}
+    <div className={`${selectedUser ? "max-md:hidden" : ""} h-full flex flex-col bg-neutral-950 p-3`}>
+      {/* Top bar */}
       <div className="flex items-center justify-between mb-4 relative">
         <h2 className="text-green-400 font-bold text-xl">CHATTER BOX</h2>
 
@@ -31,15 +36,11 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
             onClick={() => setMenuOpen((prev) => !prev)}
           />
 
-          {/* Dropdown menu below the icon */}
           {menuOpen && (
             <div className="absolute right-0 mt-2 w-40 space-y-2 bg-neutral-900 p-3 rounded-lg shadow-lg border border-green-500/30 z-10">
               <p className="cursor-pointer hover:text-green-400">Edit Profile</p>
               <hr className="border-green-500/30" />
-              <p
-                className="cursor-pointer hover:text-red-500"
-                onClick={() => navigate("/login")}
-              >
+              <p className="cursor-pointer hover:text-red-500" onClick={logout}>
                 Logout
               </p>
             </div>
@@ -61,34 +62,30 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
 
       {/* User list */}
       <div className="space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-green-500/40 pr-2">
-        {filteredUsers.map((user, index) => (
+        {filteredUsers.map((u, index) => (
           <div
-            key={index}
-            onClick={() => setSelectedUser(user)}
+            key={u._id || index}
+            onClick={() => {
+              setSelectedUser(u);
+              setUnseenMsg((prev) => ({ ...prev, [u._id]: 0 }));
+              getMsgs(u._id);
+            }}
             className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
-              selectedUser?._id === user._id
-                ? "bg-green-900/40 border border-green-900/40"
-                : "hover:bg-neutral-800"
+              selectedUser?._id === u._id ? "bg-green-900/40 border border-green-900/40" : "hover:bg-neutral-800"
             }`}
           >
             <img
-              src={user?.profilePic || assets.avatar_icon}
+              src={u?.profilePic || assets.avatar_icon}
               alt="avatar"
               className="w-10 h-10 rounded-full border border-green-500/30"
             />
             <div className="flex-1">
-              <p className="font-medium text-white">{user?.fullName}</p>
-              <span
-                className={`text-xs ${
-                  index < 3 ? "text-green-400" : "text-gray-500"
-                }`}
-              >
-                {index < 3 ? "Online" : "Offline"}
+              <p className="font-medium text-white">{u?.fullName || "Unknown"}</p>
+              <span className={`text-xs ${onlineUsers.includes(u._id) ? "text-green-400" : "text-gray-500"}`}>
+                {onlineUsers.includes(u._id) ? "Online" : "Offline"}
               </span>
             </div>
-            {index > 2 && (
-              <span className="text-gray-400 text-xs">{index}</span>
-            )}
+            {unseenMsg[u._id] > 0 && <span className="text-gray-400 text-xs">{unseenMsg[u._id]}</span>}
           </div>
         ))}
       </div>

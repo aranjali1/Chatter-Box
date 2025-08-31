@@ -5,7 +5,7 @@ import { checkAuth } from '../middleware/auth.js';
 
 const userRouter = express.Router();
 
-userRouter.post("/sigup", signup);
+userRouter.post("/signup", signup);
 userRouter.post("/login", login);
 userRouter.get('/check',protectRoute,checkAuth);
 
