@@ -64,12 +64,14 @@ export const sendMsg=async(req,res)=>{
         if(!text&&!media){
             return res.json({success:false,message:"Msg is empty"});
         }
-        let imageUrl;
+        let imageUrl="";
         if(media){
             const uploadResponse = await cloudinary.uploader.upload(media)
             imageUrl = uploadResponse.secure_url;
         }
-        const newMsg=await Msg.create({senderId,receiverId,text,media:imageUrl});
+        const newMsg=await Msg.create({senderId,receiverId,
+            text:text || "",
+            media:imageUrl||""});
 
         //emit the new msg to the receiver's socket
         const receiverSocketId=userSocketMap[receiverId];  //get receiver's socketId from map

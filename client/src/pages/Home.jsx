@@ -19,16 +19,16 @@ const Home = () => {
       >
         {/* Sidebar */}
   <div className="bg-neutral-950 border-r border-green-500/30 p-4 min-h-0 h-full">
-          <Sidebar/>
+          <Sidebar selectedUser={selectedUser} setSelectedUser={setSelectedUser}/>
         </div>
 
         {/* Chat container */}
   <div className="bg-neutral-900 border-x border-green-500/20 h-full min-h-0">
-          <ChatContainer/>
+          <ChatContainer selectedUser={selectedUser} setSelectedUser={setSelectedUser}/>
         </div>
 
         {/* Right bar (only visible when a user is selected) */}
-            <RightBar/>
+            {selectedUser && <RightBar selectedUser={selectedUser}/>}
 
       </div>
     </div>

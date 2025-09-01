@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 
-const Sidebar = () => {
-  const { getUsers, user = [], selectedUser, setSelectedUser, unseenMsg = {}, setUnseenMsg } = useContext(ChatContext);
+const Sidebar = ({ selectedUser, setSelectedUser }) => {
+  const { getUsers, users = [], unseenMsg = {}, setUnseenMsg,getMsgs } = useContext(ChatContext);
   const { logout, onlineUsers = [] } = useContext(AuthContext);
 
   const navigate = useNavigate();
@@ -14,8 +14,8 @@ const Sidebar = () => {
 
   // Filter users based on search input
   const filteredUsers = search
-    ? user.filter((u) => u.fullName?.toLowerCase().includes(search.toLowerCase()))
-    : user;
+    ? users.filter((u) => u.fullName?.toLowerCase().includes(search.toLowerCase()))
+    : users;
 
   useEffect(() => {
     getUsers();

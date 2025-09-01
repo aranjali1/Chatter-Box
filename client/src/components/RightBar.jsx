@@ -1,10 +1,18 @@
+
 import React, { useContext } from 'react'
-import assets, { imagesDummyData } from '../assets/assets'
+import assets from '../assets/assets'
 import { AuthContext } from '../../context/AuthContext'
+import { ChatContext } from '../../context/ChatContext'
 
 const RightBar = ({ selectedUser }) => {
+  const { logout } = useContext(AuthContext);
+  const { msg } = useContext(ChatContext);
 
-  const {logout}=useContext(AuthContext);
+  // Filter media messages for the selected user
+  const mediaMessages = (msg ?? []).filter(
+    m => m.media && (m.senderId === selectedUser._id || m.receiverId === selectedUser._id)
+  );
+
   return (
     selectedUser && (
       <div className="bg-neutral-950 border-l border-green-500/30 p-4 h-full w-72 flex flex-col">
@@ -27,29 +35,33 @@ const RightBar = ({ selectedUser }) => {
         <div className="flex-1 overflow-y-auto">
           <p className="text-sm text-green-400 font-medium mb-2">Media</p>
           <div className="grid grid-cols-3 gap-2">
-            {imagesDummyData.map((url, index) => (
-              <div
-                key={index}
-                onClick={() => window.open(url)}
-                className="cursor-pointer rounded-lg overflow-hidden group"
-              >
-                <img
-                  src={url}
-                  alt=""
-                  className="w-full h-20 object-cover group-hover:scale-105 transition-transform duration-200"
-                />
-              </div>
-            ))}
+            {mediaMessages.length === 0 ? (
+              <span className="text-gray-400 col-span-3">No media shared yet.</span>
+            ) : (
+              mediaMessages.map((m, index) => (
+                <div
+                  key={index}
+                  onClick={() => window.open(m.media)}
+                  className="cursor-pointer rounded-lg overflow-hidden group"
+                >
+                  <img
+                    src={m.media}
+                    alt="chat media"
+                    className="w-full h-20 object-cover group-hover:scale-105 transition-transform duration-200"
+                  />
+                </div>
+              ))
+            )}
           </div>
         </div>
 
         {/* Logout Button */}
-        <button className="mt-4 w-full bg-green-700 hover:bg-green-600 text-white py-2 rounded-lg font-medium transition-colors duration-200" onClick={()=>logout()}>
+        <button className="mt-4 w-full bg-green-700 hover:bg-green-600 text-white py-2 rounded-lg font-medium transition-colors duration-200" onClick={() => logout()}>
           Logout
         </button>
       </div>
     )
-  )
-}
+  );
+};
 
-export default RightBar
+export default RightBar;

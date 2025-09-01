@@ -5,52 +5,74 @@ import { ChatContext } from "../../context/ChatContext.jsx";
 import { toast } from "react-hot-toast";
 import assets from "../assets/assets.js";
 
-const ChatContainer = () => {
+const ChatContainer = ({ selectedUser, setSelectedUser }) => {
   const messagesEndRef = useRef(null);
 
-  const { msg, selectedUser, sendMsg, getMsgs } = useContext(ChatContext);
+  const { msg, sendMsg, getMsgs } = useContext(ChatContext);
   const { authUser, onlineUsers } = useContext(AuthContext);
 
   const [input, setInput] = useState("");
 
-  // Send text message
+  // --- Send text message ---
   const handleSend = async (e) => {
     e.preventDefault();
-    if (input.trim() === "") return;
-    await sendMsg({ text: input.trim() });
-    setInput("");
+
+    if (!input.trim()) {
+      toast.error("Message cannot be empty");
+      return;
+    }
+
+    try {
+      const res = await sendMsg({ text: input.trim() });
+
+      if (res?.success) {
+        setInput("");
+      } else {
+        toast.error(res?.message || "Failed to send message");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Server error, please try again");
+    }
   };
 
-  // Send image
+  // --- Send image ---
   const handleSendImage = async (e) => {
     const file = e.target.files[0];
     if (!file || !file.type.startsWith("image/")) {
       toast.error("Select a valid image");
       return;
     }
+
     const reader = new FileReader();
     reader.onloadend = async () => {
-  await sendMsg({ media: reader.result });
+      try {
+        const res = await sendMsg({ media: reader.result });
+        if (!res?.success) {
+          toast.error(res?.message || "Failed to send image");
+        }
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Server error, please try again");
+      }
       e.target.value = "";
     };
     reader.readAsDataURL(file);
   };
 
-  // Auto-scroll on new messages
+  // --- Auto-scroll on new messages ---
   useEffect(() => {
     if (messagesEndRef.current && (msg?.length ?? 0) > 0) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [msg]);
 
-  // Load messages when a user is selected
+  // --- Load messages when user changes ---
   useEffect(() => {
     if (selectedUser?._id) {
       getMsgs(selectedUser._id);
     }
   }, [selectedUser]);
 
-  // If no user selected
+  // --- If no user selected ---
   if (!selectedUser) {
     return (
       <div className="flex items-center justify-center h-full text-gray-500">
@@ -99,17 +121,21 @@ const ChatContainer = () => {
               message.senderId === authUser._id ? "flex-row-reverse" : ""
             }`}
           >
-            {message.image ? (
-              <img
-                src={message.image || undefined}
-                alt="message"
-                className="max-w-[200px] rounded-lg"
-              />
-            ) : (
-              <p className="bg-gray-800 text-white px-3 py-2 rounded-lg">
-                {message.text}
-              </p>
-            )}
+            {/* Bubble Container */}
+            <div className="flex flex-col max-w-[250px]">
+              {message.text && (
+                <p className="bg-gray-800 text-white px-3 py-2 rounded-lg mb-1">
+                  {message.text}
+                </p>
+              )}
+              {message.media && (
+                <img
+                  src={message.media}
+                  alt="message"
+                  className="max-w-[200px] rounded-lg"
+                />
+              )}
+            </div>
             <span className="block text-xs text-gray-400 mt-1">
               {formatMessageTime(message.createdAt)}
             </span>
@@ -122,7 +148,7 @@ const ChatContainer = () => {
 
       {/* Input */}
       <div className="sticky bottom-0 bg-[#0d0d0d] border-t border-gray-800 px-4 py-3">
-        <div className="flex items-center gap-2">
+        <form className="flex items-center gap-2" onSubmit={handleSend}>
           <input
             onKeyDown={(e) => (e.key === "Enter" ? handleSend(e) : null)}
             type="text"
@@ -142,12 +168,12 @@ const ChatContainer = () => {
             <img src={assets.gallery_icon} alt="upload" />
           </label>
           <button
-            onClick={handleSend}
+            type="submit"
             className="bg-green-800 hover:bg-green-600 transition px-4 py-2 rounded-full text-white font-medium"
           >
             Send
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
